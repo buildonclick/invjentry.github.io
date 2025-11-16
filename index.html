@@ -277,195 +277,198 @@
     </div>
 
     <script>
-        // Initialize Supabase client
-        const supabaseUrl = 'https://uboyjffchdjienkcezil.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVib3lqZmZjaGRqaWVua2NlemlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyODk4NjAsImV4cCI6MjA3ODg2NTg2MH0.7qzq0YRQx59Pd0AL1xZDstHtDcFl7U8Hfkrix5GnyOQ';
-        
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-        
-        // DOM elements
-        const itemForm = document.getElementById('itemForm');
-        const searchInput = document.getElementById('searchItem');
-        const searchButton = document.getElementById('searchButton');
-        const showAllButton = document.getElementById('showAllButton');
-        const searchResults = document.getElementById('searchResults');
-        const formMessage = document.getElementById('formMessage');
-        const connectionStatus = document.getElementById('connectionStatus');
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Supabase client
+            const supabaseUrl = 'https://uboyjffchdjienkcezil.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVib3lqZmZjaGRqaWVua2NlemlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyODk4NjAsImV4cCI6MjA3ODg2NTg2MH0.7qzq0YRQx59Pd0AL1xZDstHtDcFl7U8Hfkrix5GnyOQ';
+            
+            const supabase = window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
+            
+            // DOM elements
+            const itemForm = document.getElementById('itemForm');
+            const searchInput = document.getElementById('searchItem');
+            const searchButton = document.getElementById('searchButton');
+            const showAllButton = document.getElementById('showAllButton');
+            const searchResults = document.getElementById('searchResults');
+            const formMessage = document.getElementById('formMessage');
+            const connectionStatus = document.getElementById('connectionStatus');
 
-        // Test database connection on page load
-        async function testConnection() {
-            try {
-                connectionStatus.textContent = "Testing database connection...";
-                connectionStatus.className = "connection-status";
+            // Test database connection on page load
+            async function testConnection() {
+                try {
+                    connectionStatus.textContent = "Testing database connection...";
+                    connectionStatus.className = "connection-status";
+                    
+                    const { data, error } = await supabase
+                        .from('inventory')
+                        .select('count')
+                        .limit(1);
+                    
+                    if (error) {
+                        throw error;
+                    }
+                    
+                    connectionStatus.textContent = "✅ Connected to database successfully!";
+                    connectionStatus.className = "connection-status connected";
+                    
+                    // Load all items after successful connection
+                    showAllItems();
+                } catch (error) {
+                    console.error('Connection error:', error);
+                    connectionStatus.textContent = "❌ Database connection failed: " + error.message;
+                    connectionStatus.className = "connection-status disconnected";
+                    searchResults.innerHTML = '<div class="error status-message">Database connection failed. Please check if the table exists and RLS policies are set correctly.</div>';
+                }
+            }
+
+            // Add item to inventory
+            itemForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
                 
-                const { data, error } = await supabase
-                    .from('inventory')
-                    .select('count')
-                    .limit(1);
+                const name = document.getElementById('itemName').value.trim();
+                const quantity = parseInt(document.getElementById('itemQuantity').value);
+                const rate = parseFloat(document.getElementById('itemRate').value);
                 
-                if (error) {
-                    throw error;
+                // Validate inputs
+                if (!name || isNaN(quantity) || quantity < 0 || isNaN(rate) || rate < 0) {
+                    showMessage('Please fill all fields with valid values', 'error');
+                    return;
                 }
                 
-                connectionStatus.textContent = "✅ Connected to database successfully!";
-                connectionStatus.className = "connection-status connected";
-                
-                // Load all items after successful connection
-                showAllItems();
-            } catch (error) {
-                console.error('Connection error:', error);
-                connectionStatus.textContent = "❌ Database connection failed: " + error.message;
-                connectionStatus.className = "connection-status disconnected";
-                searchResults.innerHTML = '<div class="error status-message">Database connection failed. Please check if the table exists and RLS policies are set correctly.</div>';
-            }
-        }
+                try {
+                    const { data, error } = await supabase
+                        .from('inventory')
+                        .insert([
+                            { 
+                                name: name, 
+                                quantity: quantity, 
+                                rate: rate
+                            }
+                        ])
+                        .select();
+                    
+                    if (error) {
+                        throw error;
+                    }
+                    
+                    showMessage('Item added successfully!', 'success');
+                    itemForm.reset();
+                    
+                    // Refresh the search results to show the new item
+                    showAllItems();
+                } catch (error) {
+                    console.error('Error adding item:', error);
+                    showMessage('Error adding item: ' + error.message, 'error');
+                }
+            });
 
-        // Add item to inventory
-        itemForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('itemName').value.trim();
-            const quantity = parseInt(document.getElementById('itemQuantity').value);
-            const rate = parseFloat(document.getElementById('itemRate').value);
-            
-            // Validate inputs
-            if (!name || isNaN(quantity) || quantity < 0 || isNaN(rate) || rate < 0) {
-                showMessage('Please fill all fields with valid values', 'error');
-                return;
-            }
-            
-            try {
-                const { data, error } = await supabase
-                    .from('inventory')
-                    .insert([
-                        { 
-                            name: name, 
-                            quantity: quantity, 
-                            rate: rate
-                        }
-                    ])
-                    .select();
+            // Search for items
+            searchButton.addEventListener('click', async () => {
+                const searchTerm = searchInput.value.trim();
                 
-                if (error) {
-                    throw error;
+                if (!searchTerm) {
+                    showAllItems();
+                    return;
                 }
                 
-                showMessage('Item added successfully!', 'success');
-                itemForm.reset();
-                
-                // Refresh the search results to show the new item
-                showAllItems();
-            } catch (error) {
-                console.error('Error adding item:', error);
-                showMessage('Error adding item: ' + error.message, 'error');
-            }
-        });
+                try {
+                    searchResults.innerHTML = '<div class="loading">Searching...</div>';
+                    
+                    const { data, error } = await supabase
+                        .from('inventory')
+                        .select('*')
+                        .ilike('name', `%${searchTerm}%`)
+                        .order('name', { ascending: true });
+                    
+                    if (error) {
+                        throw error;
+                    }
+                    
+                    displayResults(data);
+                } catch (error) {
+                    console.error('Error searching items:', error);
+                    searchResults.innerHTML = '<div class="error status-message">Error searching items: ' + error.message + '</div>';
+                }
+            });
 
-        // Search for items
-        searchButton.addEventListener('click', async () => {
-            const searchTerm = searchInput.value.trim();
-            
-            if (!searchTerm) {
-                showAllItems();
-                return;
+            // Show all items
+            showAllButton.addEventListener('click', showAllItems);
+
+            // Function to show all items
+            async function showAllItems() {
+                try {
+                    searchResults.innerHTML = '<div class="loading">Loading items...</div>';
+                    
+                    const { data, error } = await supabase
+                        .from('inventory')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    
+                    if (error) {
+                        throw error;
+                    }
+                    
+                    displayResults(data);
+                } catch (error) {
+                    console.error('Error fetching items:', error);
+                    searchResults.innerHTML = '<div class="error status-message">Error fetching items: ' + error.message + '</div>';
+                }
             }
-            
-            try {
-                searchResults.innerHTML = '<div class="loading">Searching...</div>';
-                
-                const { data, error } = await supabase
-                    .from('inventory')
-                    .select('*')
-                    .ilike('name', `%${searchTerm}%`)
-                    .order('name', { ascending: true });
-                
-                if (error) {
-                    throw error;
+
+            // Function to display search results
+            function displayResults(items) {
+                if (!items || items.length === 0) {
+                    searchResults.innerHTML = '<div class="no-results">No items found matching your search.</div>';
+                    return;
                 }
                 
-                displayResults(data);
-            } catch (error) {
-                console.error('Error searching items:', error);
-                searchResults.innerHTML = '<div class="error status-message">Error searching items: ' + error.message + '</div>';
-            }
-        });
-
-        // Show all items
-        showAllButton.addEventListener('click', showAllItems);
-
-        // Function to show all items
-        async function showAllItems() {
-            try {
-                searchResults.innerHTML = '<div class="loading">Loading items...</div>';
+                let resultsHTML = '';
                 
-                const { data, error } = await supabase
-                    .from('inventory')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    throw error;
-                }
-                
-                displayResults(data);
-            } catch (error) {
-                console.error('Error fetching items:', error);
-                searchResults.innerHTML = '<div class="error status-message">Error fetching items: ' + error.message + '</div>';
-            }
-        }
-
-        // Function to display search results
-        function displayResults(items) {
-            if (!items || items.length === 0) {
-                searchResults.innerHTML = '<div class="no-results">No items found matching your search.</div>';
-                return;
-            }
-            
-            let resultsHTML = '';
-            
-            items.forEach(item => {
-                resultsHTML += `
-                    <div class="result-item">
-                        <h3>${item.name}</h3>
-                        <div class="result-details">
-                            <div class="detail">
-                                <span class="detail-label">Quantity:</span>
-                                <div class="detail-value">${item.quantity}</div>
-                            </div>
-                            <div class="detail">
-                                <span class="detail-label">Rate:</span>
-                                <div class="detail-value">$${item.rate.toFixed(2)}</div>
-                            </div>
-                            <div class="detail">
-                                <span class="detail-label">Total Value:</span>
-                                <div class="detail-value">$${(item.quantity * item.rate).toFixed(2)}</div>
+                items.forEach(item => {
+                    resultsHTML += `
+                        <div class="result-item">
+                            <h3>${item.name}</h3>
+                            <div class="result-details">
+                                <div class="detail">
+                                    <span class="detail-label">Quantity:</span>
+                                    <div class="detail-value">${item.quantity}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="detail-label">Rate:</span>
+                                    <div class="detail-value">$${item.rate.toFixed(2)}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="detail-label">Total Value:</span>
+                                    <div class="detail-value">$${(item.quantity * item.rate).toFixed(2)}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
-            
-            searchResults.innerHTML = resultsHTML;
-        }
-
-        // Function to show status messages
-        function showMessage(message, type) {
-            formMessage.innerHTML = `<div class="status-message ${type}">${message}</div>`;
-            
-            // Clear message after 3 seconds
-            setTimeout(() => {
-                formMessage.innerHTML = '';
-            }, 3000);
-        }
-
-        // Load all items when page loads
-        document.addEventListener('DOMContentLoaded', testConnection);
-
-        // Allow pressing Enter in search field
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchButton.click();
+                    `;
+                });
+                
+                searchResults.innerHTML = resultsHTML;
             }
+
+            // Function to show status messages
+            function showMessage(message, type) {
+                formMessage.innerHTML = `<div class="status-message ${type}">${message}</div>`;
+                
+                // Clear message after 3 seconds
+                setTimeout(() => {
+                    formMessage.innerHTML = '';
+                }, 3000);
+            }
+
+            // Allow pressing Enter in search field
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
+
+            // Initialize the application
+            testConnection();
         });
     </script>
 </body>

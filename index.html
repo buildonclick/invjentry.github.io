@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Management System</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Madhuram Tiles - Browse Products</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
         }
 
         .container {
@@ -27,449 +23,268 @@
         }
 
         header {
+            background: white;
+            padding: 2rem;
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #4361ee, #3a0ca3);
-            color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            color: #333;
+            margin-bottom: 0.5rem;
         }
 
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .app-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .app-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
+        .filters {
             background: white;
+            padding: 1.5rem;
             border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: end;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h2 {
-            color: #4361ee;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
             color: #555;
         }
 
-        input {
+        input, select {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #4361ee;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
         }
 
         button {
-            background: #4361ee;
+            background: #667eea;
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background 0.3s ease, transform 0.2s ease;
-            width: 100%;
+            height: fit-content;
         }
 
         button:hover {
-            background: #3a0ca3;
-            transform: translateY(-2px);
+            background: #5a6fd8;
         }
 
-        button:active {
-            transform: translateY(0);
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
         }
 
-        .search-results {
-            margin-top: 20px;
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
         }
 
-        .result-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #4361ee;
+        .product-card:hover {
+            transform: translateY(-5px);
         }
 
-        .result-item h3 {
-            color: #3a0ca3;
-            margin-bottom: 10px;
+        .product-info {
+            padding: 1.5rem;
         }
 
-        .result-details {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .detail {
-            flex: 1;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #666;
-        }
-
-        .detail-value {
-            font-size: 1.1rem;
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
             color: #333;
         }
 
-        .no-results {
-            text-align: center;
-            padding: 20px;
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-quantity {
             color: #666;
-            font-style: italic;
         }
 
-        .status-message {
-            padding: 10px;
-            border-radius: 6px;
-            margin: 15px 0;
+        .stock-low {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .stock-available {
+            color: #27ae60;
+        }
+
+        .login-link {
             text-align: center;
-            font-weight: 500;
+            margin-top: 2rem;
         }
 
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #4361ee;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .connection-status {
-            text-align: center;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-
-        .connected {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .disconnected {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Madhuram Tiles</h1>
+        <p>Quality Tiles for Your Dream Home</p>
+    </header>
+
     <div class="container">
-        <header>
-            <h1>Inventory Management System</h1>
-            <p class="subtitle">Add, search, and manage your inventory items</p>
-        </header>
-
-        <div id="connectionStatus" class="connection-status">
-            Testing database connection...
+        <div class="filters">
+            <div class="filter-group">
+                <label for="searchInput">Search by Name</label>
+                <input type="text" id="searchInput" placeholder="Search tiles...">
+            </div>
+            <div class="filter-group">
+                <label for="minPrice">Min Price (₹)</label>
+                <input type="number" id="minPrice" placeholder="Min price">
+            </div>
+            <div class="filter-group">
+                <label for="maxPrice">Max Price (₹)</label>
+                <input type="number" id="maxPrice" placeholder="Max price">
+            </div>
+            <div class="filter-group">
+                <label for="quantityFilter">Stock Status</label>
+                <select id="quantityFilter">
+                    <option value="all">All Items</option>
+                    <option value="inStock">In Stock</option>
+                    <option value="lowStock">Low Stock</option>
+                </select>
+            </div>
+            <button onclick="applyFilters()">Apply Filters</button>
+            <button onclick="clearFilters()" style="background: #95a5a6;">Clear</button>
         </div>
 
-        <div class="app-container">
-            <div class="card">
-                <h2>Add New Item</h2>
-                <form id="itemForm">
-                    <div class="form-group">
-                        <label for="itemName">Item Name</label>
-                        <input type="text" id="itemName" placeholder="Enter item name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="itemQuantity">Quantity</label>
-                        <input type="number" id="itemQuantity" placeholder="Enter quantity" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="itemRate">Rate (Price per unit)</label>
-                        <input type="number" id="itemRate" placeholder="Enter rate" min="0" step="0.01" required>
-                    </div>
-                    <button type="submit">Add Item to Inventory</button>
-                </form>
-                <div id="formMessage"></div>
-            </div>
-
-            <div class="card">
-                <h2>Search Items</h2>
-                <div class="form-group">
-                    <label for="searchItem">Search by Item Name</label>
-                    <input type="text" id="searchItem" placeholder="Enter item name to search">
-                </div>
-                <button id="searchButton">Search</button>
-                <button id="showAllButton" style="margin-top: 10px; background: #6c757d;">Show All Items</button>
-                
-                <div class="search-results" id="searchResults">
-                    <div class="loading">Loading items...</div>
-                </div>
-            </div>
+        <div class="products-grid" id="productsGrid">
+            <!-- Products will be loaded here -->
         </div>
 
-        <footer>
-            <p>Inventory Management System &copy; 2023 | Powered by Supabase</p>
-        </footer>
+        <div class="login-link">
+            <p>Are you the owner? <a href="login.html">Login here</a></p>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Initialize everything when the page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Supabase client
-            const supabaseUrl = 'https://uboyjffchdjienkcezil.supabase.co';
-            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVib3lqZmZjaGRqaWVua2NlemlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyODk4NjAsImV4cCI6MjA3ODg2NTg2MH0.7qzq0YRQx59Pd0AL1xZDstHtDcFl7U8Hfkrix5GnyOQ';
-            
-            const supabase = window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
-            
-            // DOM elements
-            const itemForm = document.getElementById('itemForm');
-            const searchInput = document.getElementById('searchItem');
-            const searchButton = document.getElementById('searchButton');
-            const showAllButton = document.getElementById('showAllButton');
-            const searchResults = document.getElementById('searchResults');
-            const formMessage = document.getElementById('formMessage');
-            const connectionStatus = document.getElementById('connectionStatus');
+        const SUPABASE_URL = "https://igpevnaygdcvkparkgbn.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGV2bmF5Z2RjdmtwYXJrZ2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNzE4NTksImV4cCI6MjA3ODk0Nzg1OX0.e1LtzUDzpSBI7kZ6QXdSeBwYDNsfXU9Q_VJJfrRT-30";
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // Test database connection on page load
-            async function testConnection() {
-                try {
-                    connectionStatus.textContent = "Testing database connection...";
-                    connectionStatus.className = "connection-status";
-                    
-                    const { data, error } = await supabase
-                        .from('inventory')
-                        .select('count')
-                        .limit(1);
-                    
-                    if (error) {
-                        throw error;
-                    }
-                    
-                    connectionStatus.textContent = "✅ Connected to database successfully!";
-                    connectionStatus.className = "connection-status connected";
-                    
-                    // Load all items after successful connection
-                    showAllItems();
-                } catch (error) {
-                    console.error('Connection error:', error);
-                    connectionStatus.textContent = "❌ Database connection failed: " + error.message;
-                    connectionStatus.className = "connection-status disconnected";
-                    searchResults.innerHTML = '<div class="error status-message">Database connection failed. Please check if the table exists and RLS policies are set correctly.</div>';
-                }
+        // Load products on page load
+        document.addEventListener('DOMContentLoaded', loadProducts);
+
+        async function loadProducts() {
+            const { data: items, error } = await supabase
+                .from('items')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error loading products:', error);
+            } else {
+                displayProducts(items);
+            }
+        }
+
+        function displayProducts(items) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; width: 100%;">No products found.</p>';
+                return;
             }
 
-            // Add item to inventory
-            itemForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
                 
-                const name = document.getElementById('itemName').value.trim();
-                const quantity = parseInt(document.getElementById('itemQuantity').value);
-                const rate = parseFloat(document.getElementById('itemRate').value);
-                
-                // Validate inputs
-                if (!name || isNaN(quantity) || quantity < 0 || isNaN(rate) || rate < 0) {
-                    showMessage('Please fill all fields with valid values', 'error');
-                    return;
-                }
-                
-                try {
-                    const { data, error } = await supabase
-                        .from('inventory')
-                        .insert([
-                            { 
-                                name: name, 
-                                quantity: quantity, 
-                                rate: rate
-                            }
-                        ])
-                        .select();
-                    
-                    if (error) {
-                        throw error;
-                    }
-                    
-                    showMessage('Item added successfully!', 'success');
-                    itemForm.reset();
-                    
-                    // Refresh the search results to show the new item
-                    showAllItems();
-                } catch (error) {
-                    console.error('Error adding item:', error);
-                    showMessage('Error adding item: ' + error.message, 'error');
-                }
+                const stockClass = item.quantity === 0 ? 'stock-low' : 
+                                 item.quantity < 10 ? 'stock-low' : 'stock-available';
+                const stockText = item.quantity === 0 ? 'Out of Stock' : 
+                                item.quantity < 10 ? `Only ${item.quantity} left!` : `${item.quantity} in stock`;
+
+                card.innerHTML = `
+                    <div class="product-info">
+                        <div class="product-name">${item.name}</div>
+                        <div class="product-price">₹${item.price}</div>
+                        <div class="product-quantity ${stockClass}">${stockText}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
             });
+        }
 
-            // Search for items
-            searchButton.addEventListener('click', async () => {
-                const searchTerm = searchInput.value.trim();
-                
-                if (!searchTerm) {
-                    showAllItems();
-                    return;
-                }
-                
-                try {
-                    searchResults.innerHTML = '<div class="loading">Searching...</div>';
-                    
-                    const { data, error } = await supabase
-                        .from('inventory')
-                        .select('*')
-                        .ilike('name', `%${searchTerm}%`)
-                        .order('name', { ascending: true });
-                    
-                    if (error) {
-                        throw error;
-                    }
-                    
-                    displayResults(data);
-                } catch (error) {
-                    console.error('Error searching items:', error);
-                    searchResults.innerHTML = '<div class="error status-message">Error searching items: ' + error.message + '</div>';
-                }
-            });
+        async function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const minPrice = document.getElementById('minPrice').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            const quantityFilter = document.getElementById('quantityFilter').value;
 
-            // Show all items
-            showAllButton.addEventListener('click', showAllItems);
+            let query = supabase.from('items').select('*');
 
-            // Function to show all items
-            async function showAllItems() {
-                try {
-                    searchResults.innerHTML = '<div class="loading">Loading items...</div>';
-                    
-                    const { data, error } = await supabase
-                        .from('inventory')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-                    
-                    if (error) {
-                        throw error;
-                    }
-                    
-                    displayResults(data);
-                } catch (error) {
-                    console.error('Error fetching items:', error);
-                    searchResults.innerHTML = '<div class="error status-message">Error fetching items: ' + error.message + '</div>';
-                }
+            // Apply search filter
+            if (searchTerm) {
+                query = query.ilike('name', `%${searchTerm}%`);
             }
 
-            // Function to display search results
-            function displayResults(items) {
-                if (!items || items.length === 0) {
-                    searchResults.innerHTML = '<div class="no-results">No items found matching your search.</div>';
-                    return;
-                }
-                
-                let resultsHTML = '';
-                
-                items.forEach(item => {
-                    resultsHTML += `
-                        <div class="result-item">
-                            <h3>${item.name}</h3>
-                            <div class="result-details">
-                                <div class="detail">
-                                    <span class="detail-label">Quantity:</span>
-                                    <div class="detail-value">${item.quantity}</div>
-                                </div>
-                                <div class="detail">
-                                    <span class="detail-label">Rate:</span>
-                                    <div class="detail-value">$${item.rate.toFixed(2)}</div>
-                                </div>
-                                <div class="detail">
-                                    <span class="detail-label">Total Value:</span>
-                                    <div class="detail-value">$${(item.quantity * item.rate).toFixed(2)}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                searchResults.innerHTML = resultsHTML;
+            // Apply price filters
+            if (minPrice) {
+                query = query.gte('price', parseFloat(minPrice));
+            }
+            if (maxPrice) {
+                query = query.lte('price', parseFloat(maxPrice));
             }
 
-            // Function to show status messages
-            function showMessage(message, type) {
-                formMessage.innerHTML = `<div class="status-message ${type}">${message}</div>`;
-                
-                // Clear message after 3 seconds
-                setTimeout(() => {
-                    formMessage.innerHTML = '';
-                }, 3000);
+            // Apply quantity filter
+            if (quantityFilter === 'inStock') {
+                query = query.gt('quantity', 0);
+            } else if (quantityFilter === 'lowStock') {
+                query = query.lt('quantity', 10).gt('quantity', 0);
             }
 
-            // Allow pressing Enter in search field
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    searchButton.click();
-                }
-            });
+            const { data: items, error } = await query.order('created_at', { ascending: false });
 
-            // Initialize the application
-            testConnection();
-        });
+            if (error) {
+                console.error('Error filtering products:', error);
+            } else {
+                displayProducts(items);
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('minPrice').value = '';
+            document.getElementById('maxPrice').value = '';
+            document.getElementById('quantityFilter').value = 'all';
+            loadProducts();
+        }
+
+        // Add real-time search
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('minPrice').addEventListener('input', applyFilters);
+        document.getElementById('maxPrice').addEventListener('input', applyFilters);
+        document.getElementById('quantityFilter').addEventListener('change', applyFilters);
     </script>
 </body>
 </html>

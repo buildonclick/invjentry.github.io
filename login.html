@@ -9,201 +9,425 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            overflow: hidden;
         }
 
-        h1 {
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px 20px;
             text-align: center;
-            color: #333;
-            margin-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-toggle {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: #6c757d;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #3498db;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-icon {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .form-icon i {
+            font-size: 50px;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .form-icon h2 {
+            color: #2c3e50;
+            font-size: 24px;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #555;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
         }
 
         input {
             width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
         }
 
         input:focus {
+            border-color: #3498db;
             outline: none;
-            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
         button {
             width: 100%;
-            padding: 0.75rem;
-            background: #667eea;
+            padding: 14px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            margin-bottom: 1rem;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
 
         button:hover {
-            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
         }
 
-        .switch-form {
-            text-align: center;
-            margin-top: 1rem;
-        }
-
-        .switch-form button {
-            background: none;
-            color: #667eea;
-            border: none;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        .error {
+        .error-message {
             color: #e74c3c;
+            margin-top: 10px;
             text-align: center;
-            margin-bottom: 1rem;
+            font-size: 14px;
             display: none;
+            padding: 10px;
+            background: #fdf2f2;
+            border-radius: 5px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .success-message {
+            color: #27ae60;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            padding: 10px;
+            background: #f2fdf2;
+            border-radius: 5px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .password-requirements {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .form-icon i {
+                font-size: 40px;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>Madhuram Tiles</h1>
-        <div id="loginForm">
-            <div class="error" id="errorMessage"></div>
-            <div class="form-group">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" placeholder="Enter your email">
-            </div>
-            <div class="form-group">
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" placeholder="Enter your password">
-            </div>
-            <button onclick="login()">Login</button>
-            <div class="switch-form">
-                <button onclick="showRegister()">Don't have an account? Register</button>
-            </div>
+        <div class="header">
+            <h1>Madhuram Tiles</h1>
+            <p>Inventory Management System</p>
         </div>
-
-        <div id="registerForm" style="display: none;">
-            <div class="error" id="registerErrorMessage"></div>
-            <div class="form-group">
-                <label for="registerEmail">Email</label>
-                <input type="email" id="registerEmail" placeholder="Enter your email">
+        
+        <div class="form-container">
+            <div class="form-toggle">
+                <div class="toggle-btn active" data-form="login">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </div>
+                <div class="toggle-btn" data-form="register">
+                    <i class="fas fa-user-plus"></i> Register
+                </div>
             </div>
-            <div class="form-group">
-                <label for="registerPassword">Password</label>
-                <input type="password" id="registerPassword" placeholder="Create a password">
+            
+            <div id="login-form" class="form active">
+                <div class="form-icon">
+                    <i class="fas fa-lock"></i>
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to your account</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="login-email" placeholder="Enter your email">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="Enter your password">
+                    </div>
+                </div>
+                
+                <button id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+                <div id="login-error" class="error-message"></div>
             </div>
-            <button onclick="register()">Register</button>
-            <div class="switch-form">
-                <button onclick="showLogin()">Already have an account? Login</button>
+            
+            <div id="register-form" class="form">
+                <div class="form-icon">
+                    <i class="fas fa-user-plus"></i>
+                    <h2>Create Account</h2>
+                    <p>Join Madhuram Tiles today</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-email">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="register-email" placeholder="Enter your email">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="register-password" placeholder="Create a password">
+                    </div>
+                    <div class="password-requirements">
+                        Password must be at least 6 characters long
+                    </div>
+                </div>
+                
+                <button id="register-btn">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+                <div id="register-error" class="error-message"></div>
+                <div id="register-success" class="success-message"></div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = "https://igpevnaygdcvkparkgbn.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGV2bmF5Z2RjdmtwYXJrZ2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNzE4NTksImV4cCI6MjA3ODk0Nzg1OX0.e1LtzUDzpSBI7kZ6QXdSeBwYDNsfXU9Q_VJJfrRT-30";
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Supabase configuration
+        const SUPABASE_URL = "https://tfzqehwkqgebvimqrfmw.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmenFlaHdrcWdlYnZpbXFyZm13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTM4NjEsImV4cCI6MjA3OTEyOTg2MX0.GKLOtiC6ENQlniEpEXlbBG5KONUS10TB-fmygxlxJwc";
 
-        function showRegister() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-        }
+        // Initialize Supabase client
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        function showLogin() {
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-        }
-
-        async function login() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const errorElement = document.getElementById('errorMessage');
-
-            if (!email || !password) {
-                showError(errorElement, 'Please fill in all fields');
-                return;
-            }
-
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
+        // Form switching
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active button
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Show corresponding form
+                const formType = btn.dataset.form;
+                document.querySelectorAll('.form').forEach(form => form.classList.remove('active'));
+                document.getElementById(`${formType}-form`).classList.add('active');
+                
+                // Clear error messages
+                document.querySelectorAll('.error-message, .success-message').forEach(msg => {
+                    msg.style.display = 'none';
+                });
             });
+        });
 
-            if (error) {
-                showError(errorElement, error.message);
-            } else {
-                window.location.href = 'owner.html';
-            }
-        }
-
-        async function register() {
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const errorElement = document.getElementById('registerErrorMessage');
-
+        // Login function
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorElement = document.getElementById('login-error');
+            
             if (!email || !password) {
-                showError(errorElement, 'Please fill in all fields');
+                errorElement.textContent = 'Please fill in all fields';
+                errorElement.style.display = 'block';
                 return;
             }
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) {
+                    errorElement.textContent = error.message;
+                    errorElement.style.display = 'block';
+                } else {
+                    // Show loading state
+                    const loginBtn = document.getElementById('login-btn');
+                    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+                    loginBtn.disabled = true;
+                    
+                    // Redirect to owner page after short delay
+                    setTimeout(() => {
+                        window.location.href = 'owner.html';
+                    }, 1000);
+                }
+            } catch (err) {
+                errorElement.textContent = 'An error occurred during login';
+                errorElement.style.display = 'block';
+            }
+        });
 
+        // Register function
+        document.getElementById('register-btn').addEventListener('click', async () => {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const errorElement = document.getElementById('register-error');
+            const successElement = document.getElementById('register-success');
+            
+            if (!email || !password) {
+                errorElement.textContent = 'Please fill in all fields';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
             if (password.length < 6) {
-                showError(errorElement, 'Password must be at least 6 characters');
+                errorElement.textContent = 'Password should be at least 6 characters';
+                errorElement.style.display = 'block';
                 return;
             }
-
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password
-            });
-
-            if (error) {
-                showError(errorElement, error.message);
-            } else {
-                showError(errorElement, 'Registration successful! Please login.', 'success');
-                showLogin();
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password
+                });
+                
+                if (error) {
+                    errorElement.textContent = error.message;
+                    errorElement.style.display = 'block';
+                    successElement.style.display = 'none';
+                } else {
+                    successElement.textContent = 'Registration successful! Please check your email for verification.';
+                    successElement.style.display = 'block';
+                    errorElement.style.display = 'none';
+                    
+                    // Clear form
+                    document.getElementById('register-email').value = '';
+                    document.getElementById('register-password').value = '';
+                    
+                    // Switch to login tab after 3 seconds
+                    setTimeout(() => {
+                        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+                        
+                        document.querySelector('.toggle-btn[data-form="login"]').classList.add('active');
+                        document.getElementById('login-form').classList.add('active');
+                        
+                        successElement.style.display = 'none';
+                    }, 3000);
+                }
+            } catch (err) {
+                errorElement.textContent = 'An error occurred during registration';
+                errorElement.style.display = 'block';
+                successElement.style.display = 'none';
             }
-        }
+        });
 
-        function showError(element, message, type = 'error') {
-            element.textContent = message;
-            element.style.display = 'block';
-            element.style.color = type === 'success' ? '#27ae60' : '#e74c3c';
-        }
+        // Allow form submission with Enter key
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeForm = document.querySelector('.form.active');
+                if (activeForm.id === 'login-form') {
+                    document.getElementById('login-btn').click();
+                } else if (activeForm.id === 'register-form') {
+                    document.getElementById('register-btn').click();
+                }
+            }
+        });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>

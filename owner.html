@@ -316,6 +316,49 @@
             margin-top: 5px;
         }
 
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quantity-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .in-stock {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .low-stock {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .out-of-stock {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
         @media (max-width: 768px) {
             header {
                 flex-direction: column;
@@ -450,7 +493,12 @@
                             </tr>
                         </thead>
                         <tbody id="items-tbody">
-                            <!-- Items will be populated here -->
+                            <tr>
+                                <td colspan="4" class="loading">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading items...</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -458,14 +506,14 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // Supabase configuration
         const SUPABASE_URL = "https://tfzqehwkqgebvimqrfmw.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmenFlaHdrcWdlYnZpbXFyZm13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTM4NjEsImV4cCI6MjA3OTEyOTg2MX0.GKLOtiC6ENQlniEpEXlbBG5KONUS10TB-fmygxlxJwc";
 
         // Initialize Supabase client
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // DOM elements
         const userEmailElement = document.getElementById('email-text');
@@ -490,35 +538,56 @@
 
         // Check authentication and load user data
         async function checkAuth() {
-            const { data: { session }, error } = await supabaseClient.auth.getSession();
-            
-            if (!session) {
+            try {
+                console.log('Checking authentication...');
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                
+                if (error) {
+                    console.error('Auth error:', error);
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                if (!session) {
+                    console.log('No session found, redirecting to login');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                console.log('User authenticated:', session.user.email);
+                userEmailElement.textContent = session.user.email;
+                await loadItems();
+                
+            } catch (err) {
+                console.error('Auth check failed:', err);
                 window.location.href = 'login.html';
-                return;
             }
-            
-            userEmailElement.textContent = session.user.email;
-            loadItems();
         }
 
         // Load items from Supabase
         async function loadItems() {
             try {
+                console.log('Loading items from Supabase...');
+                
                 const { data, error } = await supabaseClient
                     .from('items')
                     .select('*')
                     .order('created_at', { ascending: false });
                 
                 if (error) {
+                    console.error('Error loading items:', error);
                     showMessage('Error loading items: ' + error.message, 'error');
                     return;
                 }
                 
+                console.log('Items loaded successfully:', data);
                 currentItems = data || [];
                 renderItems(currentItems);
                 updateStats(currentItems);
+                
             } catch (err) {
-                showMessage('Error loading items', 'error');
+                console.error('Error in loadItems:', err);
+                showMessage('Error loading items from database', 'error');
             }
         }
 
@@ -526,7 +595,7 @@
         function updateStats(items) {
             const totalItems = items.length;
             const lowStock = items.filter(item => item.quantity < 10 && item.quantity > 0).length;
-            const totalValue = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const totalValue = items.reduce((sum, item) => sum + (parseFloat(item.price) * parseInt(item.quantity)), 0);
             
             totalItemsElement.textContent = totalItems;
             lowStockElement.textContent = lowStock;
@@ -538,18 +607,18 @@
             itemsTbody.innerHTML = '';
             
             if (items.length === 0) {
-                itemsTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px; color: #6c757d;">No items found</td></tr>';
+                itemsTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px; color: #6c757d;">No items found. Add your first item above!</td></tr>';
                 return;
             }
             
             items.forEach(item => {
-                const row = document.createElement('tr');
                 const stockClass = item.quantity === 0 ? 'out-of-stock' : item.quantity < 10 ? 'low-stock' : 'in-stock';
                 const stockText = item.quantity === 0 ? 'Out of Stock' : item.quantity < 10 ? 'Low Stock' : 'In Stock';
                 
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${item.name}</td>
-                    <td>₹${item.price}</td>
+                    <td>₹${parseFloat(item.price).toFixed(2)}</td>
                     <td>
                         <span class="quantity-badge ${stockClass}">${item.quantity}</span>
                         <small style="color: #6c757d; margin-left: 5px;">${stockText}</small>
@@ -585,19 +654,31 @@
             const quantity = parseInt(quantityInput.value);
             const id = itemIdInput.value;
             
-            if (!name || isNaN(price) || isNaN(quantity)) {
-                showMessage('Please fill all fields correctly', 'error');
+            // Validation
+            if (!name) {
+                showMessage('Please enter item name', 'error');
                 return;
             }
             
-            if (price < 0 || quantity < 0) {
-                showMessage('Price and quantity cannot be negative', 'error');
+            if (isNaN(price) || price < 0) {
+                showMessage('Please enter a valid price', 'error');
+                return;
+            }
+            
+            if (isNaN(quantity) || quantity < 0) {
+                showMessage('Please enter a valid quantity', 'error');
                 return;
             }
             
             try {
+                // Show loading state
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                submitBtn.disabled = true;
+                
                 if (isEditing) {
                     // Update existing item
+                    console.log('Updating item:', { id, name, price, quantity });
                     const { data, error } = await supabaseClient
                         .from('items')
                         .update({
@@ -609,37 +690,54 @@
                         .eq('id', id);
                     
                     if (error) {
-                        showMessage('Error updating item: ' + error.message, 'error');
-                        return;
+                        throw error;
                     }
                     
                     showMessage('Item updated successfully', 'success');
                     resetForm();
                 } else {
                     // Add new item
+                    console.log('Adding new item:', { name, price, quantity });
                     const { data, error } = await supabaseClient
                         .from('items')
-                        .insert([{ name, price, quantity }]);
+                        .insert([{ 
+                            name, 
+                            price, 
+                            quantity 
+                        }]);
                     
                     if (error) {
-                        showMessage('Error adding item: ' + error.message, 'error');
-                        return;
+                        throw error;
                     }
                     
                     showMessage('Item added successfully', 'success');
                     resetForm();
                 }
                 
-                loadItems();
-            } catch (err) {
-                showMessage('Error saving item', 'error');
+                // Reload items
+                await loadItems();
+                
+            } catch (error) {
+                console.error('Error saving item:', error);
+                showMessage('Error saving item: ' + error.message, 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                if (isEditing) {
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Item';
+                } else {
+                    submitBtn.innerHTML = '<i class="fas fa-plus"></i> Add Item';
+                }
             }
         });
 
         // Edit item
         function editItem(id) {
             const item = currentItems.find(item => item.id == id);
-            if (!item) return;
+            if (!item) {
+                showMessage('Item not found', 'error');
+                return;
+            }
             
             isEditing = true;
             formTitle.textContent = 'Edit Item';
@@ -657,23 +755,27 @@
 
         // Delete item
         async function deleteItem(id) {
-            if (!confirm('Are you sure you want to delete this item?')) return;
+            if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+                return;
+            }
             
             try {
+                console.log('Deleting item:', id);
                 const { data, error } = await supabaseClient
                     .from('items')
                     .delete()
                     .eq('id', id);
                 
                 if (error) {
-                    showMessage('Error deleting item: ' + error.message, 'error');
-                    return;
+                    throw error;
                 }
                 
                 showMessage('Item deleted successfully', 'success');
-                loadItems();
-            } catch (err) {
-                showMessage('Error deleting item', 'error');
+                await loadItems();
+                
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                showMessage('Error deleting item: ' + error.message, 'error');
             }
         }
 
@@ -714,13 +816,20 @@
 
         // Logout
         logoutBtn.addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
+            try {
+                await supabaseClient.auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = 'login.html';
+            }
         });
 
-        // Initialize
-        checkAuth();
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing Owner Dashboard...');
+            checkAuth();
+        });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>

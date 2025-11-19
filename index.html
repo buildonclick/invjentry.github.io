@@ -9,11 +9,12 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f5f7fa;
+            color: #333;
         }
 
         .container {
@@ -23,268 +24,574 @@
         }
 
         header {
-            background: white;
-            padding: 2rem;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 0.5rem;
+        .logo h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .admin-link {
+            margin-top: 15px;
+        }
+
+        .admin-link a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        .admin-link a:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .filters {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            align-items: end;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (min-width: 768px) {
+            .filters {
+                grid-template-columns: 1fr 1fr 1fr auto;
+            }
         }
 
         .filter-group {
-            flex: 1;
-            min-width: 200px;
+            display: flex;
+            flex-direction: column;
         }
 
         label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
         }
 
         input, select {
             width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
         }
 
-        button {
-            background: #667eea;
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 8px;
             cursor: pointer;
-            height: fit-content;
+            font-weight: 600;
+            align-self: flex-end;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        button:hover {
-            background: #5a6fd8;
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .reset-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            align-self: flex-end;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reset-btn:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
         }
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
         }
 
         .product-card {
-            background: white;
-            border-radius: 10px;
+            background-color: white;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
         }
 
         .product-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image i {
+            font-size: 60px;
+            z-index: 1;
         }
 
         .product-info {
-            padding: 1.5rem;
+            padding: 25px;
         }
 
         .product-name {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
         }
 
         .product-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-
-        .product-quantity {
-            color: #666;
-        }
-
-        .stock-low {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-
-        .stock-available {
+            font-size: 24px;
+            font-weight: 700;
             color: #27ae60;
+            margin-bottom: 15px;
         }
 
-        .login-link {
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .quantity-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .in-stock {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .low-stock {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .out-of-stock {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .product-description {
+            color: #6c757d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .no-products {
+            grid-column: 1 / -1;
             text-align: center;
-            margin-top: 2rem;
+            padding: 60px 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
 
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
+        .no-products i {
+            font-size: 60px;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+        }
+
+        .no-products p {
+            color: #7f8c8d;
+            font-size: 18px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+            border-top: 4px solid #3498db;
+        }
+
+        .stat-number {
+            font-size: 28px;
             font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .filter-actions {
+                flex-direction: column;
+            }
+            
+            .stats-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            header {
+                padding: 20px 15px;
+                margin-bottom: 25px;
+            }
+            
+            .logo h1 {
+                font-size: 28px;
+            }
+            
+            .filters {
+                padding: 20px;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-bar {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Madhuram Tiles</h1>
-        <p>Quality Tiles for Your Dream Home</p>
-    </header>
-
     <div class="container">
+        <header>
+            <div class="logo">
+                <h1><i class="fas fa-store"></i> Madhuram Tiles</h1>
+                <p>Quality Tiles for Every Space</p>
+            </div>
+            <div class="admin-link">
+                <a href="login.html"><i class="fas fa-user-shield"></i> Admin Login</a>
+            </div>
+        </header>
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number" id="total-products">0</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="in-stock-count">0</div>
+                <div class="stat-label">In Stock</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="affordable-count">0</div>
+                <div class="stat-label">Under ₹50</div>
+            </div>
+        </div>
+        
         <div class="filters">
             <div class="filter-group">
-                <label for="searchInput">Search by Name</label>
-                <input type="text" id="searchInput" placeholder="Search tiles...">
+                <label for="search">Search by Name</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search" placeholder="Enter product name...">
+                </div>
             </div>
             <div class="filter-group">
-                <label for="minPrice">Min Price (₹)</label>
-                <input type="number" id="minPrice" placeholder="Min price">
+                <label for="min-price">Min Price (₹)</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                    <input type="number" id="min-price" placeholder="Min price" min="0">
+                </div>
             </div>
             <div class="filter-group">
-                <label for="maxPrice">Max Price (₹)</label>
-                <input type="number" id="maxPrice" placeholder="Max price">
+                <label for="max-price">Max Price (₹)</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                    <input type="number" id="max-price" placeholder="Max price" min="0">
+                </div>
             </div>
-            <div class="filter-group">
-                <label for="quantityFilter">Stock Status</label>
-                <select id="quantityFilter">
-                    <option value="all">All Items</option>
-                    <option value="inStock">In Stock</option>
-                    <option value="lowStock">Low Stock</option>
-                </select>
+            <div class="filter-actions">
+                <button class="search-btn" id="apply-filters">
+                    <i class="fas fa-filter"></i> Apply
+                </button>
+                <button class="reset-btn" id="reset-filters">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
             </div>
-            <button onclick="applyFilters()">Apply Filters</button>
-            <button onclick="clearFilters()" style="background: #95a5a6;">Clear</button>
         </div>
-
-        <div class="products-grid" id="productsGrid">
-            <!-- Products will be loaded here -->
-        </div>
-
-        <div class="login-link">
-            <p>Are you the owner? <a href="login.html">Login here</a></p>
+        
+        <div class="products-grid" id="products-container">
+            <!-- Product cards will be populated here -->
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = "https://igpevnaygdcvkparkgbn.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGV2bmF5Z2RjdmtwYXJrZ2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNzE4NTksImV4cCI6MjA3ODk0Nzg1OX0.e1LtzUDzpSBI7kZ6QXdSeBwYDNsfXU9Q_VJJfrRT-30";
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Supabase configuration
+        const SUPABASE_URL = "https://tfzqehwkqgebvimqrfmw.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmenFlaHdrcWdlYnZpbXFyZm13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTM4NjEsImV4cCI6MjA3OTEyOTg2MX0.GKLOtiC6ENQlniEpEXlbBG5KONUS10TB-fmygxlxJwc";
 
-        // Load products on page load
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        // Initialize Supabase client
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function loadProducts() {
-            const { data: items, error } = await supabase
-                .from('items')
-                .select('*')
-                .order('created_at', { ascending: false });
+        // DOM elements
+        const searchInput = document.getElementById('search');
+        const minPriceInput = document.getElementById('min-price');
+        const maxPriceInput = document.getElementById('max-price');
+        const applyFiltersBtn = document.getElementById('apply-filters');
+        const resetFiltersBtn = document.getElementById('reset-filters');
+        const productsContainer = document.getElementById('products-container');
+        const totalProductsElement = document.getElementById('total-products');
+        const inStockCountElement = document.getElementById('in-stock-count');
+        const affordableCountElement = document.getElementById('affordable-count');
 
-            if (error) {
-                console.error('Error loading products:', error);
-            } else {
-                displayProducts(items);
+        let allItems = [];
+
+        // Load items from Supabase
+        async function loadItems() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('items')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Error loading items:', error);
+                    showError('Failed to load products. Please try again later.');
+                    return;
+                }
+                
+                allItems = data || [];
+                renderItems(allItems);
+                updateStats(allItems);
+            } catch (err) {
+                console.error('Error loading items:', err);
+                showError('Failed to load products. Please check your connection.');
             }
         }
 
-        function displayProducts(items) {
-            const grid = document.getElementById('productsGrid');
-            grid.innerHTML = '';
+        // Update statistics
+        function updateStats(items) {
+            const totalProducts = items.length;
+            const inStockCount = items.filter(item => item.quantity > 0).length;
+            const affordableCount = items.filter(item => item.price < 50).length;
+            
+            totalProductsElement.textContent = totalProducts;
+            inStockCountElement.textContent = inStockCount;
+            affordableCountElement.textContent = affordableCount;
+        }
 
+        // Render items as product cards
+        function renderItems(items) {
+            productsContainer.innerHTML = '';
+            
             if (items.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; width: 100%;">No products found.</p>';
+                productsContainer.innerHTML = `
+                    <div class="no-products">
+                        <i class="fas fa-box-open"></i>
+                        <p>No products found matching your criteria</p>
+                    </div>
+                `;
                 return;
             }
-
+            
             items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'product-card';
+                const stockStatus = getStockStatus(item.quantity);
+                const stockClass = getStockClass(item.quantity);
+                const stockText = getStockText(item.quantity);
+                const tileIcons = ['fas fa-th-large', 'fas fa-square', 'fas fa-border-all', 'fas fa-cube'];
+                const randomIcon = tileIcons[Math.floor(Math.random() * tileIcons.length)];
                 
-                const stockClass = item.quantity === 0 ? 'stock-low' : 
-                                 item.quantity < 10 ? 'stock-low' : 'stock-available';
-                const stockText = item.quantity === 0 ? 'Out of Stock' : 
-                                item.quantity < 10 ? `Only ${item.quantity} left!` : `${item.quantity} in stock`;
-
-                card.innerHTML = `
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <div class="product-image">
+                        <i class="${randomIcon}"></i>
+                    </div>
                     <div class="product-info">
                         <div class="product-name">${item.name}</div>
                         <div class="product-price">₹${item.price}</div>
-                        <div class="product-quantity ${stockClass}">${stockText}</div>
+                        <div class="product-meta">
+                            <span class="quantity-badge ${stockClass}">${stockText}</span>
+                            <span>Qty: ${item.quantity}</span>
+                        </div>
+                        <div class="product-description">
+                            High-quality ${item.name.toLowerCase()} perfect for your home or commercial space.
+                        </div>
                     </div>
                 `;
-                grid.appendChild(card);
+                productsContainer.appendChild(productCard);
             });
         }
 
-        async function applyFilters() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const minPrice = document.getElementById('minPrice').value;
-            const maxPrice = document.getElementById('maxPrice').value;
-            const quantityFilter = document.getElementById('quantityFilter').value;
+        // Get stock status based on quantity
+        function getStockStatus(quantity) {
+            if (quantity === 0) return 'out-of-stock';
+            if (quantity < 10) return 'low-stock';
+            return 'in-stock';
+        }
 
-            let query = supabase.from('items').select('*');
+        // Get stock class for styling
+        function getStockClass(quantity) {
+            const status = getStockStatus(quantity);
+            return status;
+        }
 
-            // Apply search filter
-            if (searchTerm) {
-                query = query.ilike('name', `%${searchTerm}%`);
-            }
-
-            // Apply price filters
-            if (minPrice) {
-                query = query.gte('price', parseFloat(minPrice));
-            }
-            if (maxPrice) {
-                query = query.lte('price', parseFloat(maxPrice));
-            }
-
-            // Apply quantity filter
-            if (quantityFilter === 'inStock') {
-                query = query.gt('quantity', 0);
-            } else if (quantityFilter === 'lowStock') {
-                query = query.lt('quantity', 10).gt('quantity', 0);
-            }
-
-            const { data: items, error } = await query.order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Error filtering products:', error);
-            } else {
-                displayProducts(items);
+        // Get stock text for display
+        function getStockText(quantity) {
+            const status = getStockStatus(quantity);
+            switch (status) {
+                case 'out-of-stock': return 'Out of Stock';
+                case 'low-stock': return 'Low Stock';
+                case 'in-stock': return 'In Stock';
+                default: return 'Unknown';
             }
         }
 
-        function clearFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('minPrice').value = '';
-            document.getElementById('maxPrice').value = '';
-            document.getElementById('quantityFilter').value = 'all';
-            loadProducts();
+        // Apply filters
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const minPrice = minPriceInput.value ? parseFloat(minPriceInput.value) : 0;
+            const maxPrice = maxPriceInput.value ? parseFloat(maxPriceInput.value) : Infinity;
+            
+            const filteredItems = allItems.filter(item => {
+                // Search filter
+                if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) {
+                    return false;
+                }
+                
+                // Price filter
+                if (item.price < minPrice || item.price > maxPrice) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            renderItems(filteredItems);
+            updateStats(filteredItems);
         }
 
-        // Add real-time search
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('minPrice').addEventListener('input', applyFilters);
-        document.getElementById('maxPrice').addEventListener('input', applyFilters);
-        document.getElementById('quantityFilter').addEventListener('change', applyFilters);
+        // Reset filters
+        function resetFilters() {
+            searchInput.value = '';
+            minPriceInput.value = '';
+            maxPriceInput.value = '';
+            renderItems(allItems);
+            updateStats(allItems);
+        }
+
+        // Show error message
+        function showError(message) {
+            productsContainer.innerHTML = `
+                <div class="no-products">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Event listeners
+        applyFiltersBtn.addEventListener('click', applyFilters);
+        resetFiltersBtn.addEventListener('click', resetFilters);
+
+        // Apply filters when Enter is pressed in search
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+
+        // Initialize
+        loadItems();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>

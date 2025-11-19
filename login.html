@@ -68,6 +68,10 @@
             border-radius: 8px;
             transition: all 0.3s ease;
             color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .toggle-btn.active {
@@ -104,6 +108,12 @@
         .form-icon h2 {
             color: #2c3e50;
             font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .form-icon p {
+            color: #6c757d;
+            font-size: 14px;
         }
 
         .form-group {
@@ -156,11 +166,23 @@
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .register-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+
+        .register-btn:hover {
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
         }
 
         .error-message {
@@ -191,6 +213,7 @@
             font-size: 12px;
             color: #6c757d;
             margin-top: 5px;
+            padding-left: 10px;
         }
 
         @media (max-width: 480px) {
@@ -208,6 +231,11 @@
             
             .form-icon i {
                 font-size: 40px;
+            }
+            
+            .toggle-btn {
+                padding: 10px;
+                font-size: 14px;
             }
         }
     </style>
@@ -230,6 +258,7 @@
                 </div>
             </div>
             
+            <!-- Login Form -->
             <div id="login-form" class="form active">
                 <div class="form-icon">
                     <i class="fas fa-lock"></i>
@@ -259,6 +288,7 @@
                 <div id="login-error" class="error-message"></div>
             </div>
             
+            <!-- Register Form -->
             <div id="register-form" class="form">
                 <div class="form-icon">
                     <i class="fas fa-user-plus"></i>
@@ -281,11 +311,11 @@
                         <input type="password" id="register-password" placeholder="Create a password">
                     </div>
                     <div class="password-requirements">
-                        Password must be at least 6 characters long
+                        <i class="fas fa-info-circle"></i> Password must be at least 6 characters long
                     </div>
                 </div>
                 
-                <button id="register-btn">
+                <button id="register-btn" class="register-btn">
                     <i class="fas fa-user-plus"></i> Create Account
                 </button>
                 <div id="register-error" class="error-message"></div>
@@ -303,21 +333,27 @@
         const { createClient } = supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Form switching
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Update active button
-                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                // Show corresponding form
-                const formType = btn.dataset.form;
-                document.querySelectorAll('.form').forEach(form => form.classList.remove('active'));
-                document.getElementById(`${formType}-form`).classList.add('active');
-                
-                // Clear error messages
-                document.querySelectorAll('.error-message, .success-message').forEach(msg => {
-                    msg.style.display = 'none';
+        // Form switching functionality - FIXED VERSION
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            const forms = document.querySelectorAll('.form');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetForm = this.getAttribute('data-form');
+                    
+                    // Remove active class from all buttons and forms
+                    toggleButtons.forEach(btn => btn.classList.remove('active'));
+                    forms.forEach(form => form.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding form
+                    this.classList.add('active');
+                    document.getElementById(`${targetForm}-form`).classList.add('active');
+                    
+                    // Clear error messages
+                    document.querySelectorAll('.error-message, .success-message').forEach(msg => {
+                        msg.style.display = 'none';
+                    });
                 });
             });
         });
@@ -346,6 +382,7 @@
                 } else {
                     // Show loading state
                     const loginBtn = document.getElementById('login-btn');
+                    const originalText = loginBtn.innerHTML;
                     loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
                     loginBtn.disabled = true;
                     
@@ -382,7 +419,10 @@
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
-                    password
+                    password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/owner.html'
+                    }
                 });
                 
                 if (error) {
@@ -427,6 +467,24 @@
                 }
             }
         });
+
+        // Test function to verify form switching is working
+        function testFormSwitching() {
+            console.log('Testing form switching...');
+            const loginBtn = document.querySelector('.toggle-btn[data-form="login"]');
+            const registerBtn = document.querySelector('.toggle-btn[data-form="register"]');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            console.log('Login button:', loginBtn);
+            console.log('Register button:', registerBtn);
+            console.log('Login form:', loginForm);
+            console.log('Register form:', registerForm);
+            console.log('Current active form:', document.querySelector('.form.active'));
+        }
+
+        // Run test on load
+        window.addEventListener('load', testFormSwitching);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>

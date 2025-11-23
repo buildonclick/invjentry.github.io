@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Search - Google Maps</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .search-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: #4285f4;
+        }
+
+        .search-box button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .business-card {
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+            transition: transform 0.2s;
+        }
+
+        .business-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .error {
+            background: #fce8e6;
+            color: #c5221f;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #5f6368;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4285f4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Business Search</h1>
+            <p>Find detailed business information from Google Maps</p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="businessName" placeholder="Enter business name (e.g., 'Starbucks near Times Square')" />
+                <button onclick="searchBusiness()" id="searchBtn">Search Business</button>
+            </div>
+            <div class="location-options">
+                <input type="text" id="location" placeholder="Optional: City, State, or Country (e.g., New York)" style="width: 100%; padding: 12px; margin-top: 10px; border: 2px solid #e1e5e9; border-radius: 8px;" />
+            </div>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Your Google Maps API Key
+        const API_KEY = 'AIzaSyBz8TJrPNKb7lzxwLC4P6C6vWl7Ut3akOY';
+        
+        // CORS Proxy - you can use one of these
+        const CORS_PROXIES = [
+            'https://cors-anywhere.herokuapp.com/',
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?'
+        ];
+
+        let currentProxyIndex = 0;
+
+        function getProxyUrl(url) {
+            // Try different proxies if one fails
+            return CORS_PROXIES[currentProxyIndex] + encodeURIComponent(url);
+        }
+
+        async function searchBusiness() {
+            const businessName = document.getElementById('businessName').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const resultsDiv = document.getElementById('results');
+            const searchBtn = document.getElementById('searchBtn');
+
+            if (!businessName) {
+                showError('Please enter a business name');
+                return;
+            }
+
+            // Show loading state
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching for businesses...</p>
+                </div>
+            `;
+
+            try {
+                // Build search query
+                let query = businessName;
+                if (location) {
+                    query += ` in ${location}`;
+                }
+
+                const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${API_KEY}`;
+                
+                // Try with proxy first
+                let response = await fetchWithProxy(searchUrl);
+                
+                if (!response.ok) {
+                    // If proxy fails, try next proxy
+                    currentProxyIndex = (currentProxyIndex + 1) % CORS_PROXIES.length;
+                    response = await fetchWithProxy(searchUrl);
+                }
+
+                const searchData = await response.json();
+
+                if (searchData.status === 'OK') {
+                    await displayBusinesses(searchData.results);
+                } else if (searchData.status === 'ZERO_RESULTS') {
+                    showNoResults();
+                } else {
+                    showError(`API Error: ${searchData.status} - ${searchData.error_message || 'Please check your API key and billing'}`);
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                showError(`Failed to search: ${error.message}. Try using a local server instead.`);
+            } finally {
+                // Reset button
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search Business';
+            }
+        }
+
+        async function fetchWithProxy(url) {
+            const proxyUrl = getProxyUrl(url);
+            console.log('Trying proxy:', CORS_PROXIES[currentProxyIndex]);
+            return await fetch(proxyUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+        }
+
+        async function displayBusinesses(businesses) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (businesses.length === 0) {
+                showNoResults();
+                return;
+            }
+
+            let html = `<h2 style="color: white; text-align: center; margin-bottom: 20px;">Found ${businesses.length} businesses</h2>`;
+            
+            for (const business of businesses.slice(0, 5)) { // Limit to first 5 results
+                html += createBusinessCard(business);
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        function createBusinessCard(business) {
+            const rating = business.rating || 'No rating';
+            const totalRatings = business.user_ratings_total ? `(${business.user_ratings_total} reviews)` : '';
+            
+            return `
+                <div class="business-card">
+                    <div style="font-size: 1.3rem; font-weight: 600; color: #1a73e8; margin-bottom: 10px;">
+                        ${business.name}
+                    </div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <strong>📍 Address:</strong> ${business.formatted_address || 'Not available'}
+                    </div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <strong>⭐ Rating:</strong> ${rating} ${totalRatings}
+                    </div>
+                    
+                    ${business.types ? `
+                    <div style="margin-bottom: 10px;">
+                        <strong>🏷️ Types:</strong> ${business.types.slice(0, 3).join(', ')}
+                    </div>
+                    ` : ''}
+                    
+                    ${business.opening_hours ? `
+                    <div style="margin-bottom: 10px;">
+                        <strong>🕒 Open Now:</strong> ${business.opening_hours.open_now ? 'Yes' : 'No'}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function showNoResults() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: white;">
+                    <h3>No businesses found</h3>
+                    <p>Try adjusting your search terms or location</p>
+                </div>
+            `;
+        }
+
+        // Allow pressing Enter to search
+        document.getElementById('businessName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchBusiness();
+            }
+        });
+
+        document.getElementById('location').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchBusiness();
+            }
+        });
+    </script>
+</body>
+</html>

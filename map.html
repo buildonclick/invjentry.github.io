@@ -24,28 +24,45 @@
 <body>
 
 <h1>Google Places API Test</h1>
-<button onclick="testPlaces()">Search Nearby Places</button>
+<button onclick="searchPlaces()">Search Nearby Places</button>
 
 <div id="results">Results will appear here...</div>
 
+<!-- Hidden map container (required by Google) -->
+<div id="map" style="height:0; width:0;"></div>
+
 <script>
-async function testPlaces() {
+let map;
+let service;
 
-    const API_KEY = "AIzaSyBz8TJrPNKb7lzxwLC4P6C6vWl7Ut3akOY";   // ← Replace this
+function initMap() {
+    const location = { lat: 40.748817, lng: -73.985428 }; // Empire State Building
 
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.748817,-73.985428&radius=1500&type=restaurant&key=${API_KEY}`;
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: location,
+        zoom: 15
+    });
 
-    document.getElementById("results").innerHTML = "Loading...";
+    service = new google.maps.places.PlacesService(map);
+}
 
-    const response = await fetch(url);
-    const data = await response.json();
+function searchPlaces() {
 
-    console.log(data);
+    const request = {
+        location: new google.maps.LatLng(40.748817, -73.985428),
+        radius: 1500,
+        type: ["restaurant"]
+    };
 
-    let html = "";
+    service.nearbySearch(request, (results, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK) {
+            document.getElementById("results").innerHTML = "Error: " + status;
+            return;
+        }
 
-    if (data.results) {
-        data.results.forEach(place => {
+        let html = "";
+
+        results.forEach(place => {
             html += `
                 <div class="place">
                     <strong>${place.name}</strong><br>
@@ -54,13 +71,15 @@ async function testPlaces() {
                 </div>
             `;
         });
-    } else {
-        html = "No results.";
-    }
 
-    document.getElementById("results").innerHTML = html;
+        document.getElementById("results").innerHTML = html;
+    });
 }
 </script>
+
+<!-- Google Maps JS API + Places Library -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBz8TJrPNKb7lzxwLC4P6C6vWl7Ut3akOY&libraries=places&callback=initMap"
+        async defer></script>
 
 </body>
 </html>

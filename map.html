@@ -1,485 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Search - Google Places API</title>
+    <title>Google Places API Test</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: Arial;
             padding: 20px;
+            background: #f5f5f5;
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        h1 { color: #333; }
+        #results {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 6px;
         }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .search-container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 15px 20px;
-            font-size: 16px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .search-box input:focus {
-            border-color: #4285f4;
-        }
-
-        .search-box button {
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: 600;
-            background: linear-gradient(135deg, #4285f4, #34a853);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .search-box button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .search-box button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .location-input {
-            margin-top: 15px;
-        }
-
-        .location-input input {
-            width: 100%;
-            padding: 12px 15px;
-            font-size: 14px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            outline: none;
-        }
-
-        .business-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-
-        .business-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .business-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #1a73e8;
-            margin-bottom: 15px;
-        }
-
-        .business-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: #5f6368;
-            min-width: 80px;
-        }
-
-        .info-value {
-            color: #202124;
-            flex: 1;
-        }
-
-        .rating {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .stars {
-            color: #fbbc04;
-        }
-
-        .open-status {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .open-true {
-            background: #e6f4ea;
-            color: #34a853;
-        }
-
-        .open-false {
-            background: #fce8e6;
-            color: #ea4335;
-        }
-
-        .error {
-            background: #fce8e6;
-            color: #c5221f;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin: 10px 0;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #5f6368;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4285f4;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: white;
-        }
-
-        .sample-searches {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .sample-btn {
-            margin: 5px;
-            padding: 8px 15px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid white;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .sample-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        @media (max-width: 768px) {
-            .search-box {
-                flex-direction: column;
-            }
-            
-            .business-info {
-                grid-template-columns: 1fr;
-            }
+        .place {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔍 Business Search</h1>
-            <p>Find business information using Google Places API</p>
-        </div>
 
-        <div class="search-container">
-            <div class="search-box">
-                <input type="text" id="businessName" placeholder="Enter business name (e.g., Starbucks, McDonald's)" />
-                <button onclick="searchBusiness()" id="searchBtn">Search Business</button>
-            </div>
-            <div class="location-input">
-                <input type="text" id="location" placeholder="Optional: City, State, or Country (e.g., New York)" />
-            </div>
-            
-            <div class="sample-searches">
-                <div style="color: white; margin-bottom: 10px; font-size: 14px;">Try these:</div>
-                <button class="sample-btn" onclick="setSearch('Starbucks')">Starbucks</button>
-                <button class="sample-btn" onclick="setSearch('McDonald\'s')">McDonald's</button>
-                <button class="sample-btn" onclick="setSearch('Walmart')">Walmart</button>
-                <button class="sample-btn" onclick="setSearch('Apple Store')">Apple Store</button>
-            </div>
-        </div>
+<h1>Google Places API Test</h1>
+<button onclick="testPlaces()">Search Nearby Places</button>
 
-        <div id="results">
-            <div class="no-results">
-                <h3>Welcome to Business Search</h3>
-                <p>Enter a business name above to get started</p>
-            </div>
-        </div>
-    </div>
+<div id="results">Results will appear here...</div>
 
-    <script>
-        // Your Google Maps API Key
-        const API_KEY = 'AIzaSyBz8TJrPNKb7lzxwLC4P6C6vWl7Ut3akOY';
+<script>
+async function testPlaces() {
 
-        function setSearch(business) {
-            document.getElementById('businessName').value = business;
-            searchBusiness();
-        }
+    const API_KEY = "AIzaSyBz8TJrPNKb7lzxwLC4P6C6vWl7Ut3akOY";   // ← Replace this
 
-        async function searchBusiness() {
-            const businessName = document.getElementById('businessName').value.trim();
-            const location = document.getElementById('location').value.trim();
-            const resultsDiv = document.getElementById('results');
-            const searchBtn = document.getElementById('searchBtn');
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.748817,-73.985428&radius=1500&type=restaurant&key=${API_KEY}`;
 
-            if (!businessName) {
-                showError('Please enter a business name');
-                return;
-            }
+    document.getElementById("results").innerHTML = "Loading...";
 
-            // Show loading state
-            searchBtn.disabled = true;
-            searchBtn.textContent = 'Searching...';
-            resultsDiv.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Searching for businesses...</p>
+    const response = await fetch(url);
+    const data = await response.json();
+
+    console.log(data);
+
+    let html = "";
+
+    if (data.results) {
+        data.results.forEach(place => {
+            html += `
+                <div class="place">
+                    <strong>${place.name}</strong><br>
+                    Rating: ${place.rating ?? "N/A"}<br>
+                    Address: ${place.vicinity ?? "No address"}
                 </div>
             `;
-
-            try {
-                // Build search query
-                let query = businessName;
-                if (location) {
-                    query += ` in ${location}`;
-                }
-
-                // Use JSONP approach to avoid CORS
-                const script = document.createElement('script');
-                script.id = 'googleApiScript';
-                script.src = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${API_KEY}&callback=handleGoogleResponse`;
-                
-                // Remove any existing script
-                const oldScript = document.getElementById('googleApiScript');
-                if (oldScript) {
-                    oldScript.remove();
-                }
-                
-                document.head.appendChild(script);
-
-            } catch (error) {
-                console.error('Search error:', error);
-                showError(`Failed to search: ${error.message}`);
-                searchBtn.disabled = false;
-                searchBtn.textContent = 'Search Business';
-            }
-        }
-
-        // Global callback function for JSONP
-        window.handleGoogleResponse = function(data) {
-            const searchBtn = document.getElementById('searchBtn');
-            const resultsDiv = document.getElementById('results');
-            
-            // Remove loading state
-            searchBtn.disabled = false;
-            searchBtn.textContent = 'Search Business';
-            
-            if (data.status === 'OK') {
-                displayBusinesses(data.results);
-            } else if (data.status === 'ZERO_RESULTS') {
-                showNoResults();
-            } else {
-                showError(`API Error: ${data.status} - ${data.error_message || 'Please check your API key and billing'}`);
-            }
-        };
-
-        function displayBusinesses(businesses) {
-            const resultsDiv = document.getElementById('results');
-            
-            if (businesses.length === 0) {
-                showNoResults();
-                return;
-            }
-
-            let html = `<h2 style="color: white; text-align: center; margin-bottom: 20px;">Found ${businesses.length} businesses</h2>`;
-            
-            businesses.slice(0, 10).forEach(business => {
-                html += createBusinessCard(business);
-            });
-            
-            resultsDiv.innerHTML = html;
-        }
-
-        function createBusinessCard(business) {
-            const rating = business.rating || 'No rating';
-            const totalRatings = business.user_ratings_total ? `(${business.user_ratings_total} reviews)` : '';
-            const isOpen = business.opening_hours ? business.opening_hours.open_now : null;
-            
-            // Create stars for rating
-            const stars = createStars(rating);
-            
-            return `
-                <div class="business-card">
-                    <div class="business-name">${business.name}</div>
-                    
-                    <div class="business-info">
-                        <div class="info-item">
-                            <span class="info-label">📍 Address:</span>
-                            <span class="info-value">${business.formatted_address || 'Not available'}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <span class="info-label">⭐ Rating:</span>
-                            <span class="info-value">
-                                <div class="rating">
-                                    <span class="stars">${stars}</span>
-                                    <span>${rating} ${totalRatings}</span>
-                                </div>
-                            </span>
-                        </div>
-                        
-                        ${isOpen !== null ? `
-                        <div class="info-item">
-                            <span class="info-label">🕒 Status:</span>
-                            <span class="info-value">
-                                <span class="open-status ${isOpen ? 'open-true' : 'open-false'}">
-                                    ${isOpen ? 'Open Now' : 'Closed'}
-                                </span>
-                            </span>
-                        </div>
-                        ` : ''}
-                        
-                        ${business.types ? `
-                        <div class="info-item">
-                            <span class="info-label">🏷️ Types:</span>
-                            <span class="info-value">${business.types.slice(0, 5).join(', ')}</span>
-                        </div>
-                        ` : ''}
-                    </div>
-                    
-                    ${getLocationLink(business)}
-                </div>
-            `;
-        }
-
-        function createStars(rating) {
-            if (typeof rating !== 'number') return '★';
-            
-            const fullStars = Math.floor(rating);
-            const halfStar = rating % 1 >= 0.5;
-            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-            
-            return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
-        }
-
-        function getLocationLink(business) {
-            if (business.geometry && business.geometry.location) {
-                const lat = business.geometry.location.lat;
-                const lng = business.geometry.location.lng;
-                const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-                
-                return `
-                    <div style="text-align: center; margin-top: 15px;">
-                        <a href="${mapsUrl}" target="_blank" style="
-                            display: inline-block;
-                            padding: 10px 20px;
-                            background: #4285f4;
-                            color: white;
-                            text-decoration: none;
-                            border-radius: 5px;
-                            font-weight: 600;
-                            transition: background 0.3s;
-                        " onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">
-                            📍 View on Google Maps
-                        </a>
-                    </div>
-                `;
-            }
-            return '';
-        }
-
-        function showError(message) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `<div class="error">${message}</div>`;
-        }
-
-        function showNoResults() {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `
-                <div class="no-results">
-                    <h3>No businesses found</h3>
-                    <p>Try adjusting your search terms or location</p>
-                </div>
-            `;
-        }
-
-        // Allow pressing Enter to search
-        document.getElementById('businessName').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchBusiness();
-            }
         });
+    } else {
+        html = "No results.";
+    }
 
-        document.getElementById('location').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchBusiness();
-            }
-        });
-    </script>
+    document.getElementById("results").innerHTML = html;
+}
+</script>
+
 </body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nearby Places Finder - Debug Version</title>
+    <title>Nearby Restaurants Finder</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,19 +14,32 @@
             color: #333; 
             text-align: center;
         }
-        #location-info, #status, #debug, #results {
+        #location-info, #status, #results {
             margin: 15px 0;
             padding: 15px;
             border-radius: 6px;
         }
-        #location-info { background: #e8f4fd; border-left: 4px solid #4285f4; }
-        #status { background: #fff; }
-        #debug { background: #f8f9fa; border: 1px solid #ddd; font-family: monospace; }
-        #results { background: #fff; }
+        #location-info { 
+            background: #e8f4fd; 
+            border-left: 4px solid #4285f4; 
+        }
+        #status { 
+            background: #fff; 
+            min-height: 20px;
+        }
+        #results { 
+            background: #fff; 
+            min-height: 100px;
+        }
         .place {
-            padding: 10px;
+            padding: 12px;
             border-bottom: 1px solid #eee;
-            margin: 10px 0;
+            margin: 8px 0;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+        .place:last-child {
+            border-bottom: none;
         }
         button {
             background-color: #4285f4;
@@ -38,101 +51,98 @@
             font-size: 16px;
             margin: 10px 0;
         }
-        button:disabled { background-color: #a0c3ff; cursor: not-allowed; }
-        .error { color: #d93025; background: #fce8e6; padding: 10px; border-radius: 4px; }
-        .success { color: #137333; background: #e6f4ea; padding: 10px; border-radius: 4px; }
-        .warning { color: #f9ab00; background: #fff8e1; padding: 10px; border-radius: 4px; }
-        .loading { color: #666; text-align: center; padding: 20px; }
+        button:hover {
+            background-color: #3367d6;
+        }
+        button:disabled { 
+            background-color: #a0c3ff; 
+            cursor: not-allowed; 
+        }
+        .error { 
+            color: #d93025; 
+            background: #fce8e6; 
+            padding: 12px; 
+            border-radius: 4px; 
+        }
+        .success { 
+            color: #137333; 
+            background: #e6f4ea; 
+            padding: 12px; 
+            border-radius: 4px; 
+        }
+        .warning { 
+            color: #f9ab00; 
+            background: #fff8e1; 
+            padding: 12px; 
+            border-radius: 4px; 
+        }
+        .loading { 
+            color: #666; 
+            text-align: center; 
+            padding: 20px; 
+        }
+        .billing-info {
+            background: #fff8e1;
+            border: 1px solid #f9ab00;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
 
-<h1>🔍 Nearby Places Finder - Debug Mode</h1>
+<h1>🍽️ Nearby Restaurants Finder</h1>
 
 <button id="search-btn" onclick="getLocationAndSearch()">Find Nearby Restaurants</button>
 
 <div id="location-info">
-    <strong>Location Status:</strong> Waiting for user action...
+    <strong>📍 Your Location:</strong> Click the button to find restaurants near you
 </div>
 
 <div id="status">
-    <strong>API Status:</strong> Not started
-</div>
-
-<div id="debug">
-    <strong>Debug Log:</strong><br>
-    Page loaded successfully. Click the button to start.
+    <!-- Status messages will appear here -->
 </div>
 
 <div id="results">
-    <strong>Results:</strong> Will appear here after search
+    <!-- Results will appear here -->
+</div>
+
+<div class="billing-info">
+    <strong>💳 Billing Setup Required:</strong>
+    <p>Google Places API requires billing to be enabled. Please:</p>
+    <ol>
+        <li>Go to <a href="https://console.cloud.google.com/billing" target="_blank">Google Cloud Console → Billing</a></li>
+        <li>Ensure you have a billing account linked to your project</li>
+        <li>Wait 2-5 minutes after setup</li>
+    </ol>
+    <p><small>Note: You get $200 free monthly credit, so you won't be charged for normal usage.</small></p>
 </div>
 
 <script>
-let googleLoaded = false;
+let map;
+let service;
 let userLocation = null;
+let googleLoaded = false;
 
-// Debug logging function
-function debugLog(message, type = 'info') {
-    const debugDiv = document.getElementById('debug');
-    const timestamp = new Date().toLocaleTimeString();
-    const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
-    debugDiv.innerHTML += `${icon} [${timestamp}] ${message}<br>`;
-    debugDiv.scrollTop = debugDiv.scrollHeight;
-    console.log(`[${type.toUpperCase()}] ${message}`);
-}
-
-// Check if Google Maps API loaded
-function checkGoogleLoaded() {
-    if (window.google && window.google.maps) {
-        googleLoaded = true;
-        debugLog('Google Maps API detected as loaded', 'success');
-        return true;
-    }
-    return false;
-}
-
-// Initialize with fallback
-function initializeApp() {
-    debugLog('Initializing application...');
+function initMap() {
+    console.log("Google Maps API loaded successfully");
+    googleLoaded = true;
     
-    // Check if Google loaded every second for 10 seconds
-    let checkCount = 0;
-    const checkInterval = setInterval(() => {
-        checkCount++;
-        if (checkGoogleLoaded()) {
-            clearInterval(checkInterval);
-            initializeMap();
-        } else if (checkCount >= 10) {
-            clearInterval(checkInterval);
-            debugLog('Google Maps API failed to load after 10 seconds', 'error');
-            document.getElementById('status').innerHTML = '<div class="error">❌ Google Maps API failed to load. The API key may be invalid or missing required permissions.</div>';
-        }
-    }, 1000);
+    // Create minimal map
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 0, lng: 0 },
+        zoom: 2
+    });
+
+    service = new google.maps.places.PlacesService(map);
+    updateStatus('✅ Google Maps API loaded successfully', 'success');
 }
 
-function initializeMap() {
-    try {
-        debugLog('Initializing Google Maps service...');
-        
-        // Create minimal hidden map
-        const mapElement = document.createElement('div');
-        mapElement.style.display = 'none';
-        document.body.appendChild(mapElement);
-        
-        const map = new google.maps.Map(mapElement, {
-            center: { lat: 0, lng: 0 },
-            zoom: 2
-        });
-
-        window.placesService = new google.maps.places.PlacesService(map);
-        debugLog('Google Places service initialized successfully', 'success');
-        document.getElementById('status').innerHTML = '<div class="success">✅ Google Places API ready</div>';
-        
-    } catch (error) {
-        debugLog(`Failed to initialize map: ${error.message}`, 'error');
-        document.getElementById('status').innerHTML = `<div class="error">❌ Map initialization failed: ${error.message}</div>`;
-    }
+function updateStatus(message, type = 'info') {
+    const statusDiv = document.getElementById('status');
+    const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+    statusDiv.innerHTML = `<div class="${className}">${message}</div>`;
 }
 
 function getLocationAndSearch() {
@@ -140,56 +150,53 @@ function getLocationAndSearch() {
     searchBtn.disabled = true;
     searchBtn.textContent = "Finding Location...";
     
-    debugLog('Starting location detection...');
-    document.getElementById('results').innerHTML = '<div class="loading">🔄 Finding your location...</div>';
+    updateStatus('📍 Detecting your location...');
+    document.getElementById('results').innerHTML = '<div class="loading">Finding your location...</div>';
 
     if (!navigator.geolocation) {
-        debugLog('Geolocation API not supported by browser', 'error');
-        document.getElementById('status').innerHTML = '<div class="error">❌ Geolocation not supported by your browser</div>';
+        updateStatus('❌ Geolocation is not supported by your browser', 'error');
         searchBtn.disabled = false;
         searchBtn.textContent = "Find Nearby Restaurants";
         return;
     }
 
     navigator.geolocation.getCurrentPosition(
-        (position) => {
+        position => {
             userLocation = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
             
             document.getElementById('location-info').innerHTML = 
-                `<strong>📍 Your Location:</strong><br>
+                `<strong>📍 Your Current Location:</strong><br>
                  Latitude: ${userLocation.lat.toFixed(6)}<br>
                  Longitude: ${userLocation.lng.toFixed(6)}`;
             
-            debugLog(`Location obtained: ${userLocation.lat}, ${userLocation.lng}`, 'success');
+            updateStatus('✅ Location found! Searching for restaurants...', 'success');
             searchNearbyPlaces();
         },
-        (error) => {
-            let errorMsg = "Location Error: ";
+        error => {
+            let errorMessage = "❌ Location Error: ";
             switch(error.code) {
-                case 1: errorMsg += "Permission denied"; break;
-                case 2: errorMsg += "Position unavailable"; break;
-                case 3: errorMsg += "Timeout"; break;
-                default: errorMsg += "Unknown error";
+                case error.PERMISSION_DENIED:
+                    errorMessage += "Please allow location access in your browser settings.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += "Location information is unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += "Location request timed out.";
+                    break;
+                default:
+                    errorMessage += "An unknown error occurred.";
+                    break;
             }
             
-            debugLog(errorMsg, 'error');
-            document.getElementById('status').innerHTML = `<div class="error">❌ ${errorMsg}</div>`;
-            document.getElementById('results').innerHTML = `<div class="error">${errorMsg}. Please allow location access and try again.</div>`;
+            updateStatus(errorMessage, 'error');
+            document.getElementById('results').innerHTML = "";
             
             searchBtn.disabled = false;
             searchBtn.textContent = "Find Nearby Restaurants";
-            
-            // Fallback: Use a default location (New York)
-            debugLog('Using fallback location (New York)', 'warning');
-            userLocation = { lat: 40.7128, lng: -74.0060 };
-            document.getElementById('location-info').innerHTML = 
-                `<strong>📍 Using Default Location (New York):</strong><br>
-                 Latitude: ${userLocation.lat.toFixed(6)}<br>
-                 Longitude: ${userLocation.lng.toFixed(6)}`;
-            searchNearbyPlaces();
         },
         {
             enableHighAccuracy: true,
@@ -203,12 +210,10 @@ function searchNearbyPlaces() {
     const searchBtn = document.getElementById('search-btn');
     searchBtn.textContent = "Searching Restaurants...";
     
-    debugLog('Starting Places API search...');
-    document.getElementById('results').innerHTML = '<div class="loading">🔍 Searching for nearby restaurants...</div>';
+    document.getElementById('results').innerHTML = '<div class="loading">Searching for nearby restaurants...</div>';
 
-    if (!window.placesService) {
-        debugLog('Places service not available', 'error');
-        document.getElementById('status').innerHTML = '<div class="error">❌ Places service not initialized</div>';
+    if (!userLocation) {
+        updateStatus('❌ Location not available', 'error');
         searchBtn.disabled = false;
         searchBtn.textContent = "Find Nearby Restaurants";
         return;
@@ -216,74 +221,75 @@ function searchNearbyPlaces() {
 
     const request = {
         location: new google.maps.LatLng(userLocation.lat, userLocation.lng),
-        radius: 5000, // 5km
-        type: ['restaurant']
+        radius: 10000, // 10km
+        type: ["restaurant"]
     };
 
-    debugLog(`Sending request: ${JSON.stringify(request)}`);
-
-    // Add timeout for Places API call
+    // Set timeout for API call
     const apiTimeout = setTimeout(() => {
-        debugLog('Places API request timed out (10 seconds)', 'error');
-        document.getElementById('status').innerHTML = '<div class="error">❌ Places API request timed out</div>';
-        document.getElementById('results').innerHTML = '<div class="error">The search timed out. This usually means the API key is invalid or the Places API is not enabled.</div>';
+        updateStatus('❌ Request timeout - Places API may require billing setup', 'error');
+        document.getElementById('results').innerHTML = `
+            <div class="error">
+                <strong>API Request Timed Out</strong><br>
+                This usually means:<br>
+                1. Places API is not enabled, OR<br>
+                2. Billing is not set up for your Google Cloud project<br><br>
+                Please check the billing setup instructions below.
+            </div>
+        `;
         searchBtn.disabled = false;
         searchBtn.textContent = "Find Nearby Restaurants";
     }, 10000);
 
-    window.placesService.nearbySearch(request, (results, status) => {
+    service.nearbySearch(request, (results, status) => {
         clearTimeout(apiTimeout);
         
-        debugLog(`Places API response: ${status}`);
-        console.log('Places API Response:', { status, results });
-
         searchBtn.disabled = false;
         searchBtn.textContent = "Find Nearby Restaurants";
 
         if (status !== google.maps.places.PlacesServiceStatus.OK) {
-            let errorMsg = "Places API Error: ";
+            let errorMsg = "❌ Search Error: ";
             switch(status) {
-                case 'ZERO_RESULTS': errorMsg = "No restaurants found nearby"; break;
-                case 'INVALID_REQUEST': errorMsg = "Invalid API request - check API key"; break;
-                case 'OVER_QUERY_LIMIT': errorMsg = "API quota exceeded"; break;
-                case 'REQUEST_DENIED': errorMsg = "API request denied - check if Places API is enabled"; break;
-                case 'UNKNOWN_ERROR': errorMsg = "Unknown API error"; break;
-                default: errorMsg += status;
+                case google.maps.places.PlacesServiceStatus.ZERO_RESULTS:
+                    errorMsg = "No restaurants found within 10km of your location.";
+                    break;
+                case google.maps.places.PlacesServiceStatus.INVALID_REQUEST:
+                    errorMsg = "Invalid API request. Please check your API key configuration.";
+                    break;
+                case google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT:
+                    errorMsg = "API quota exceeded. Please try again later.";
+                    break;
+                case google.maps.places.PlacesServiceStatus.REQUEST_DENIED:
+                    errorMsg = "API request denied. Please ensure Places API is enabled and billing is set up.";
+                    break;
+                case google.maps.places.PlacesServiceStatus.UNKNOWN_ERROR:
+                    errorMsg = "Unknown error occurred. Please try again.";
+                    break;
+                default:
+                    errorMsg += status;
             }
             
-            debugLog(errorMsg, 'error');
-            document.getElementById('status').innerHTML = `<div class="error">❌ ${errorMsg}</div>`;
-            
-            if (status === 'REQUEST_DENIED' || status === 'INVALID_REQUEST') {
-                document.getElementById('results').innerHTML = `
-                    <div class="error">
-                        <strong>API Configuration Issue Detected:</strong><br>
-                        1. Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a><br>
-                        2. Enable "Places API" and "Maps JavaScript API"<br>
-                        3. Ensure billing is set up<br>
-                        4. Restrict your API key to these APIs and your domain
-                    </div>
-                `;
-            } else {
-                document.getElementById('results').innerHTML = `<div class="error">${errorMsg}</div>`;
-            }
+            updateStatus(errorMsg, 'error');
+            document.getElementById('results').innerHTML = "";
             return;
         }
 
-        debugLog(`Success! Found ${results.length} restaurants`, 'success');
-        document.getElementById('status').innerHTML = `<div class="success">✅ Found ${results.length} restaurants nearby!</div>`;
+        // Success! Display results
+        updateStatus(`✅ Found ${results.length} restaurants near you!`, 'success');
 
-        let html = '<div class="success">🎉 Search successful! Found restaurants:</div>';
+        let html = "";
         if (results.length === 0) {
-            html = '<div class="warning">No restaurants found within 5km radius</div>';
+            html = "<div class='warning'>No restaurants found within 10km radius.</div>";
         } else {
-            results.slice(0, 10).forEach((place, index) => {
+            results.forEach(place => {
+                const rating = place.rating ? `${place.rating} ⭐` : "No rating";
+                const priceLevel = place.price_level ? '$'.repeat(place.price_level) : '';
+                
                 html += `
                     <div class="place">
-                        <strong>${index + 1}. ${place.name}</strong><br>
-                        ⭐ Rating: ${place.rating || 'N/A'}<br>
-                        📍 Address: ${place.vicinity || 'Address not available'}<br>
-                        💰 Price Level: ${'$'.repeat(place.price_level || 1)}
+                        <strong>${place.name}</strong><br>
+                        Rating: ${rating} ${priceLevel}<br>
+                        Address: ${place.vicinity || "Address not available"}
                     </div>
                 `;
             });
@@ -293,28 +299,20 @@ function searchNearbyPlaces() {
     });
 }
 
-// Start the application
-initializeApp();
-
-// Manual fallback in case Google API fails
+// Check if Google Maps API loaded properly
 setTimeout(() => {
     if (!googleLoaded) {
-        debugLog('Google Maps API not detected after page load', 'warning');
-        document.getElementById('status').innerHTML = `
-            <div class="warning">
-                ⚠️ Google Maps API not loaded. Common fixes:<br>
-                1. Check API key in Google Cloud Console<br>
-                2. Enable Places API and Maps JavaScript API<br>
-                3. Add "invjentry.github.io" to allowed domains<br>
-                4. Ensure billing is set up
-            </div>
-        `;
+        updateStatus('❌ Google Maps API failed to load. Please check your API key and restrictions.', 'error');
     }
-}, 3000);
+}, 5000);
 </script>
 
-<!-- Google Maps API - This is likely where the issue is -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBz8TJrPNKb7lzxwLC4P6C6vWl7Ut3akOY&libraries=places&callback=checkGoogleLoaded" async defer></script>
+<!-- Hidden map container -->
+<div id="map" style="height:0; width:0;"></div>
+
+<!-- Google Maps JS API + Places Library -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBz8TJrPNKb7lzxwLC4P6C6vWl7Ut3akOY&libraries=places&callback=initMap"
+        async defer></script>
 
 </body>
 </html>
